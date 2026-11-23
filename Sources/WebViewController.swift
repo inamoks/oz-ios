@@ -175,7 +175,7 @@ extension WebViewController: WKNavigationDelegate {
             decisionHandler(.cancel)
             return
         }
-        if navigationAction.shouldPerformDownload {
+        if #available(iOS 14.5, *), navigationAction.shouldPerformDownload {
             decisionHandler(.cancel)
             toast("已拦截文件下载")
             return
