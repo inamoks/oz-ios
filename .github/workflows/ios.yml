@@ -2,14 +2,22 @@ name: build-ios-ipa
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main, master ]
+
+concurrency:
+  group: ios-build
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: macos-14
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -19,10 +27,11 @@ jobs:
 
       - name: Build unsigned .app
         run: |
+          set -o pipefail
           xcodebuild -project oz.xcodeproj -scheme oz \
             -sdk iphoneos -configuration Release \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
-            -derivedDataPath build | tail -40
+            -derivedDataPath build 2>&1 | tail -40
 
       - name: Package into .ipa
         run: |
@@ -35,3 +44,4 @@ jobs:
         with:
           name: oz-unsigned-ipa
           path: oz-unsigned.ipa
+          if-no-files-found: error
