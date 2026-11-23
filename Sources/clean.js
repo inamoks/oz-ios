@@ -62,6 +62,35 @@
     };
   } catch (e) { }
 
+  /* API 域名改写：acpcssr 被墙时把请求转投到当前站点（iOS 无请求拦截 API，必须靠这层） */
+  var API_REWRITE = /https?:\/\/acpcssr\.47u3j9k8\.work/gi;
+  function rewriteApiUrl(u) {
+    try {
+      var t = String(u);
+      if (API_REWRITE.test(t)) return t.replace(API_REWRITE, location.origin);
+    } catch (e) { }
+    return u;
+  }
+  try {
+    var _origFetch = window.fetch;
+    if (_origFetch) {
+      window.fetch = function (input, init) {
+        try {
+          if (typeof input === "string") input = rewriteApiUrl(input);
+          else if (input && input.url) input = new Request(rewriteApiUrl(input.url), input);
+        } catch (e) { }
+        return _origFetch.call(this, input, init);
+      };
+    }
+  } catch (e) { }
+  try {
+    var _origOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (m, u) {
+      try { arguments[1] = rewriteApiUrl(u); } catch (e) { }
+      return _origOpen.apply(this, arguments);
+    };
+  } catch (e) { }
+
   var ALLOW = ['acfan.com', 'acfan.shop', 'acfan.pro', 'acfansm07.com',
     'ccsnak4i.work', 'sy29wrn1.work', '47u3j9k8.work', 'ohj0zte6.work',
     'bdjyu9ur.work', 'edfj4k9d.work', 'byg3e85j.work', 'jgdfrpwk.work',
