@@ -60,10 +60,9 @@ final class WebViewController: UIViewController {
         ])
         observeProgress()
 
-        refreshLogin { [weak self] in
-            guard let self = self else { return }
-            if let u = URL(string: Self.entry) { self.webView.load(URLRequest(url: u)) }
-        }
+        // 先加载页面，登录异步进行并注入；不要等登录完成再加载
+        if let u = URL(string: Self.entry) { webView.load(URLRequest(url: u)) }
+        refreshLogin { [weak self] in self?.injectLogin() }
     }
 
     // MARK: - 账号
