@@ -205,10 +205,10 @@ final class WebViewController: UIViewController {
 
     private func tryNativePlay() {
         guard !nativePlayDone else { return }
-        if !webView.url!.path.hasPrefix("/play/") { return }
+        guard let path = webView.url?.path, path.hasPrefix("/play/") else { return }
         let js = """
         (function(){var h=document.documentElement.innerHTML;
-        var m=h.match(/"([a-z0-9]{2,6}\/[^"]{8,140}\.m3u8)"/i);
+        var m=h.match(/"([a-z0-9]{2,6}[/][^"]{8,140}[.]m3u8)"/i);
         var a=h.match(/"([0-9]{10}-[0-9a-f]{16,}-[^"]{0,140})"/);
         return JSON.stringify({p:m?m[1]:"",k:a?a[1]:""});})()
         """
