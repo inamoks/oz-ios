@@ -13,12 +13,16 @@
     '[id^="ad_"]', '[id^="AS_AD"]', '[data-ad-slot]', '[data-ad-client]', 'ins.adsbygoogle'
   ].join(',') + '{display:none!important;visibility:hidden!important;height:0!important;width:0!important;margin:0!important;padding:0!important}';
 
+  // 头像限尺寸，避免登录后大图撑开头顶工具栏
+  var AVATAR_CSS = ',img[class*=\"avatar\"],img[class*=\"Avatar\"],img[class*=\"user-pic\"],img[class*=\"userPic\"],img[class*=\"portrait\"],[class*=\"avatar\"] img,[class*=\"Avatar\"] img,[class*=\"user-pic\"] img' +
+    '{max-width:36px!important;max-height:36px!important;width:auto!important;height:36px!important;object-fit:cover!important;border-radius:50%!important}';
+
   function style() {
     var host = document.head || document.documentElement;
     if (!host) { setTimeout(style, 30); return; }
     var st = document.createElement('style');
     st.type = 'text/css';
-    st.appendChild(document.createTextNode(CSS));
+    st.appendChild(document.createTextNode(CSS + AVATAR_CSS));
     host.appendChild(st);
   }
 

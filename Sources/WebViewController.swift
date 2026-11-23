@@ -24,7 +24,7 @@ final class WebViewController: UIViewController {
         view.backgroundColor = UIColor(white: 0.07, alpha: 1)
 
         let conf = WKWebViewConfiguration()
-        conf.allowsInlineMediaPlayback = false          // 交给原生全屏播放器
+        conf.allowsInlineMediaPlayback = true          // 交给原生全屏播放器
         conf.mediaTypesRequiringUserActionForPlayback = []
         conf.preferences.javaScriptCanOpenWindowsAutomatically = false
         if let jsURL = Bundle.main.url(forResource: "clean", withExtension: "js"),
@@ -39,7 +39,7 @@ final class WebViewController: UIViewController {
         webView.allowsBackForwardNavigationGestures = true
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         // 去掉 wv 标记，避免站点判定为内嵌浏览器
-        webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+        webView.customUserAgent = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
         NSLayoutConstraint.activate([
