@@ -147,9 +147,64 @@
     }
   }
 
+  /* 运行时修正：头像超尺寸（不依赖 class 名），只处理视口顶部区域 */
+  function fixAvatars() {
+    var imgs = document.images, i, img, r, cls;
+    for (i = 0; i < imgs.length; i++) {
+      img = imgs[i];
+      cls = String(img.className || "") + " " + String((img.parentElement && img.parentElement.className) || "");
+      if (/logo|brand|banner/i.test(cls)) continue;
+      try { r = img.getBoundingClientRect(); } catch (e) { continue; }
+      if ((r.width > 56 || r.height > 56) && r.top < 220) {
+        img.style.setProperty("max-width", "36px", "important");
+        img.style.setProperty("max-height", "36px", "important");
+        img.style.setProperty("width", "36px", "important");
+        img.style.setProperty("height", "36px", "important");
+        img.style.setProperty("object-fit", "cover", "important");
+        img.style.setProperty("border-radius", "50%", "important");
+      }
+    }
+  }
+
+  /* 播放页兜底：播放器没起来时，用页面内嵌数据里的 m3u8 造一个原生播放器 */
+  var ozFallbackDone = false;
+  function videoFallback() {
+    if (ozFallbackDone) return;
+    if (location.pathname.indexOf("/play/") !== 0) return;
+    var v = document.querySelector("video");
+    if (v && v.readyState > 0) return;
+    var html = document.documentElement.innerHTML;
+    var m = html.match(/"([a-z0-9]{2,6}\/[^"]{8,140}\.m3u8)"/i);
+    if (!m) return;
+    var path = m[1];
+    var akm = html.match(/"([0-9]{10}-[0-9a-f]{16,}-[^"]{0,140})"/);
+    var ak = akm ? akm[1] : "";
+    var url = location.origin + "/api/m3u8/public/decode/authPath?path=" + encodeURIComponent(path);
+    if (ak) url += "&auth_key=" + encodeURIComponent(ak);
+    if (document.getElementById("oz-native-player")) return;
+    ozFallbackDone = true;
+    var box = document.createElement("div");
+    box.id = "oz-native-player";
+    box.style.cssText = "position:fixed;left:0;right:0;top:52px;z-index:2147483000;background:#000;padding-bottom:2px";
+    var nv = document.createElement("video");
+    nv.src = url;
+    nv.controls = true;
+    nv.setAttribute("playsinline", "");
+    nv.setAttribute("webkit-playsinline", "");
+    nv.style.cssText = "width:100%;max-height:60vh;background:#000";
+    box.appendChild(nv);
+    var close = document.createElement("div");
+    close.textContent = "✕ 关闭备用播放器";
+    close.style.cssText = "position:absolute;right:8px;top:6px;color:#fff;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:8px;font-size:12px;z-index:2";
+    close.onclick = function () { box.remove(); ozFallbackDone = false; };
+    box.appendChild(close);
+    document.body.appendChild(box);
+  }
+
   function run() {
     try { sweep(); } catch (e) { }
     try { defang(); } catch (e) { }
+    try { fixAvatars(); } catch (e) { }
   }
 
   window.__ozDefang = defang;
@@ -183,4 +238,6 @@
     boot();
   }
   try { window.addEventListener('load', boot, false); } catch (e) { }
+  setTimeout(videoFallback, 5000);
+  setTimeout(videoFallback, 9000);
 })();
